@@ -30,15 +30,48 @@ from yatl.helpers import A
 from .common import db, session, T, cache, auth, logger, authenticated, unauthenticated, flash
 from py4web.utils.url_signer import URLSigner
 from .models import get_user_email
+from py4web.utils.form import Form, FormStyleBulma
 
 url_signer = URLSigner(session)
 
 @action('index') # /fixtures_example/index
-@action.uses(db, auth, 'index.html')
+@action.uses(db, auth.user, 'index.html')
 def index():
-    print("User:", get_user_email())
-    return dict(
-        email = get_user_email(),
-        first_name = auth.current_user.get('first_name') if auth.current_user else None,
-        last_name = auth.current_user.get('last_name') if auth.current_user else None,
-    )
+    rows = db(db.product.created_by == get_user_email()).select()
+    return dict(rows=rows, url_signer=url_signer)
+
+@action('add', method=["GET", "POST"])
+@action.uses(db, session, auth.user, 'add.html')
+def add():
+    # Insert form: no record= in it.
+    form = Form(db.product, csrf_session=session, formstyle=FormStyleBulma)
+    if form.accepted:
+        # We simply redirect; the insertion already happened.
+        redirect(URL('index'))
+    # Either this is a GET request, or this is a POST but not accepted = with errors.
+    return dict(form=form)
+
+# This endpoint will be used for URLs of the form /edit/k where k is the product id.
+@action('edit/<product_id:int>', method=["GET", "POST"])
+@action.uses(db, session, auth.user, 'edit.html')
+def edit(product_id=None):
+    assert product_id is not None
+    # We read the product being edited from the db.
+    # p = db(db.product.id == product_id).select().first()
+    p = db.product[product_id]
+    if p is None:
+        # Nothing found to be edited!
+        redirect(URL('index'))
+    # Edit form: it has record=
+    form = Form(db.product, record=p, deletable=False, csrf_session=session, formstyle=FormStyleBulma)
+    if form.accepted:
+        # The update already happened!
+        redirect(URL('index'))
+    return dict(form=form)
+
+@action('delete/<product_id:int>')
+@action.uses(db, session, auth.user, url_signer.verify())
+def delete(product_id=None):
+    assert product_id is not None
+    db(db.product.id == product_id).delete()
+    redirect(URL('index'))

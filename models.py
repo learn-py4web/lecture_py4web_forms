@@ -23,9 +23,9 @@ db.define_table(
     Field('creation_date', 'datetime', default=get_time),
 )
 
-db.product.id.readable = False
-db.product.created_by.readable = False
-db.product.creation_date.readable = False
+db.product.id.readable = db.product.id.writable = False
+db.product.created_by.readable = db.product.created_by.writable = False
+db.product.creation_date.readable = db.product.creation_date.writable = False
 
 db.product.product_quantity.label = T('Quantity')
 db.product.product_price.label = T('Price')
