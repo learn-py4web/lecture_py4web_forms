@@ -1,0 +1,13 @@
+[[extend 'layout.html']]
+
+<div class="section">
+  [[if email:]]
+  <!-- The user is logged in -->
+  Welcome, [[=first_name]] [[=last_name]].
+
+  [[else:]]
+  <!-- The user is not logged in -->
+  Welcome, oh you passerby.  We hope that you will consider registering.
+
+  [[pass]]
+</div>
