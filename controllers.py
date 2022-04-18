@@ -35,13 +35,13 @@ from py4web.utils.form import Form, FormStyleBulma
 url_signer = URLSigner(session)
 
 @action('index') # /fixtures_example/index
-@action.uses('index.html', db, auth.user)
+@action.uses(url_signer, 'index.html', db, auth.user)
 def index():
     rows = db(db.product.created_by == get_user_email()).select()
     return dict(rows=rows, url_signer=url_signer)
 
 @action('add', method=["GET", "POST"])
-@action.uses('add.html', db, session, auth.user)
+@action.uses(url_signer, 'add.html', db, session, auth.user)
 def add():
     # Insert form: no record= in it.
     form = Form(db.product, csrf_session=session, formstyle=FormStyleBulma)
@@ -53,7 +53,7 @@ def add():
 
 # This endpoint will be used for URLs of the form /edit/k where k is the product id.
 @action('edit/<product_id:int>', method=["GET", "POST"])
-@action.uses('edit.html', db, session, auth.user)
+@action.uses(url_signer, 'edit.html', db, session, auth.user)
 def edit(product_id=None):
     assert product_id is not None
     # We read the product being edited from the db.
