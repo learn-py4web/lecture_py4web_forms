@@ -34,7 +34,7 @@ from py4web.utils.form import Form, FormStyleBulma
 
 url_signer = URLSigner(session)
 
-@action('index') # /fixtures_example/index
+@action('index')
 @action.uses(url_signer, 'index.html', db, auth.user)
 def index():
     rows = db(db.product.created_by == get_user_email()).select()
