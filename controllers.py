@@ -53,7 +53,7 @@ def add():
 
 # This endpoint will be used for URLs of the form /edit/k where k is the product id.
 @action('edit/<product_id:int>', method=["GET", "POST"])
-@action.uses('edit.html', url_signer, db, session, auth.user)
+@action.uses('edit.html', url_signer.verify(), db, session, auth.user)
 def edit(product_id=None):
     assert product_id is not None
     # We read the product being edited from the db.
